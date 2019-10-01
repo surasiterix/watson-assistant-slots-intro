@@ -1,173 +1,181 @@
-[![Build Status](https://travis-ci.com/IBM/watson-assistant-slots-intro.svg?branch=master)](https://travis-ci.com/IBM/watson-assistant-slots-intro)
 
-# Creating a pizza ordering chatbot using Watson Assistant slots feature
+![Logos](doc/source/images/LogoCampusParty.jpg)
 
-In this Code Pattern, we will use the Watson Assistant Slots feature to build a chatbot that takes a pizza order. The needed information such as size, type, and ingredient choices can all be entered within one Assistant Node, unlike with previous versions of Assistant.
+# Workshop - Ensablemos un Chatbot para hacer pedidos de pizza
 
-When the reader has completed this Code Pattern, they will understand how to:
+En este workshop haremos uso de las APIs de Watson de IBM, en particular las que nos habilitan a construir un Chatbot: **Watson Assistant**
 
-* Create a chatbot dialog with Watson Assistant
-* Use the power of Assistant Slots to more efficiently populate data fields
-* Use Assistant Slots to handle various inputs within one Node.
+Al terminar este workshop el participante comprenderá como hacer lo siguiente:
 
-!["Architecture"](doc/source/images/architecture.png)
+* Crear un dialogo usando Watson assistant
+* Usar Assistant Slots para optimizar la vista de dialogos
+* Usar una simple aplicación para validar el comportamiento del asistente
 
-## Flow
+## Características del taller
 
-1. User sends messages to the application (running locally or on IBM Cloud).
-2. The application sends the user message to IBM Watson Assistant service, and displays the ongoing chat in a web page.
-3. Watson Assistant uses the Slots feature to fill out the required fields for a pizza order, and sends requests for additional information back to the running application.
+* **Nivel de skill**: Cualquier nivel de skill
 
-## Included Components
+Se requiere conocimientos básicos de Git e IBM Cloud.
 
-* [IBM Watson Assistant](https://www.ibm.com/cloud/watson-assistant/): Build, test and deploy a bot or virtual agent across mobile devices, messaging platforms, or even on a physical robot.
+## Requisitos ##
 
-## Featured technologies
+* Cuenta en IBM Cloud - Crea tu IBMid desde este enlace https://ibm.biz/BdzJFA
+* Cuenta en Github - Creat tu ususario desde este enlace https://github.com
 
-* [Node.js](https://nodejs.org/): An asynchronous event driven JavaScript runtime, designed to build scalable applications.
+Para todos los efectos del taller se debe usar la región _`Dallas (US-South)`_
 
-## Watch the Video
+## Introducción ##
 
-| Using Cloud Foundry on IBM Cloud | Using IBM Cloud's Kubernetes service |
-| - | - |
-| [![video](https://i.ytimg.com/vi/dTuJU8-FnNM/0.jpg)](https://youtu.be/dTuJU8-FnNM) | [!["video"](https://i.ytimg.com/vi/G-rESweRG84/0.jpg)](https://youtu.be/G-rESweRG84) |
+Un asistente es un bot cognitivo que puede personalizar para adaptarlo a sus necesidades empresariales y desplegar en varios canales para ofrecer ayuda a los clientes donde y cuando la necesiten
 
-## Deployment options
+Para nuestro ejemplo, crearemos un asistente que pueda tomar las órdenes de Pizzas para un restaurante. La arquitectura que utilizaremos para nuestro taller
 
-Click on one of the options below for instructions on deploying the app.
+!["Arquitecrura"](doc/source/images/architecture.png)
 
-|   |   |   |   |
-| - | - | - | - |
-| [![public](https://raw.githubusercontent.com/IBM/pattern-utils/master/deploy-buttons/cf.png)](doc/source/cf.md) | [![public](https://raw.githubusercontent.com/IBM/pattern-utils/master/deploy-buttons/iks.png)](doc/source/iks.md) | [![openshift](https://raw.githubusercontent.com/IBM/pattern-utils/master/deploy-buttons/openshift.png)](doc/source/openshift.md) | [![local](https://raw.githubusercontent.com/IBM/pattern-utils/master/deploy-buttons/local.png)](doc/source/local.md) |
+El flujo que se desarrolla es como sigue:
 
-## Assistant Slots Discussion
+1. El cliente envia un mensaje a través de la Aplicación
+2. La aplicación envia el mensaje al servicio de Watson Assistant, y se presenta en la pantalla de chat de nuestra aplicación Web
+3. La API de Watson procesa el mensaje y genera la respuesta a enviar al cliente
 
-The power of Slots is in how it reduces the number of nodes required to implement logic in your Watson Assistant Dialog. Here's a partial conversation Dialog using the old method:
+Los componentes Empleados son:
 
-!["Pizza dialog old way"](doc/source/images/pizzaOldWay.png)
+* [IBM Watson Assistant](https://www.ibm.com/cloud/watson-assistant/)
+* [Node.js](https://nodejs.org/)
 
-And here's a more complete Dialog using slots, which puts all the logic in the `Pizza ordering` Node.
+## Paso a paso ##
 
-!["Pizza dialog new way"](doc/source/images/pizzaNewWay.png)
+### Preparación ###
 
-Open up the Dialog, and we'll have a look:
+Los siguientes pasos deben realizarse usando un usuarios con privilegios de administración
 
-!["Pizza dialog begin"](doc/source/images/pizzaDialogBegin.png)
+1. Descargar la CLI de IBMCloud siguiendo estas [instrucciones ](https://cloud.ibm.com/docs/cli?topic=cloud-cli-install-ibmcloud-cli)
+2. Instalar NodeJs siguiendo las instrucciones de esta [página](https://nodejs.org/es/download/current/)
+3. Validar que la CLI de IBM Cloud está operativa
 
-Each slot represents a field to be populated in the chatbot: ``pizza_size``, ``pizza_type``, and ``pizza_topings``.
-If they are not present, the user will be prompted, starting at the top, until all are populated via
-the associated variable (``$pizza_size``, ``$pizza_type``, etc).
+```
+$ ibmcloud -v
+ibmcloud version 0.19.0+94101c85-2019-09-23T03:46:57+00:00
+```
 
-Click on the Configure !["icon"](doc/source/images/pizzaGearIcon.png) to add more functionality:
+4. Validar que la CLI de NodeJs y NPM están operativas
 
-!["Pizza config 3 toppings"](doc/source/images/pizzaConfig3pizza_toppingsTop.png)
+```
+$ node -v
+v12.10.0
+$ npm -v
+6.10.3
+```
 
-Here, we can add a response for when this slot is filled (Found).
-Logic can be used for one ingredient:
+### Instalación del Skill del asistente
 
-!["Pizza config 3 one topping"](doc/source/images/pizzaConfig3Pizza_toppingsMid1ingredient.png)
+1. Crea un servicio de Watson Assistant desde el dashboard de [IBM Cloud](https://cloud.ibm.com) con tu cuenta y colocale el siguiente nombre `wcsi-conversation-service`
+2. Presiona el botón `Launch Watson Assistant` para acceder a la configuración de los servicios del asistente
+3. Selecciona la pestaña `Skills`
+4. Seleccionar `Create Skill`
+5. Selecciona `Import Skill`
+6. Selecciona carga desde archivo en esta dirección [`data/watson-pizzeria.json`](data/watson-pizzeria.json)
+7. Asegurate que esté marcado la opción `Everything` y pulsa el botó `Import`
 
-or if there are greater than one ingredient added:
+### Instalación Aplicación Web ###
 
-!["Pizza config 3 >1 topping"](doc/source/images/pizzaConfig3Pizza_toppingsMidBotGreater1.png)
+1. Crear directorio de trabajo (Por ejemplo ~/lab/)
 
-We've added logic to address yes or no answers to the question "Any extra toppings?":
+```
+$ cd ~
+$ mkdir lab
+```
+2. Clonar el [repositorio](https://github.com/IBMInnovationLabUY/watson-assistant-slots-intro.git) para descargar los artefactos del taller
 
-!["Pizza config 3 confirm not found"](doc/source/images/pizzaConfig3NewNotFoundconfirm.png)
+```
+$ cd lab
+$ git clone https://github.com/IBMInnovationLabUY/watson-assistant-slots-intro.git
+```
+3. Definir nombre único para la aplicación en el archivo [`manifest.yml`](manifest.yml).
 
-Click on the 3 circles !["icon"](doc/source/images/pizza3circles.png) and choose `Open JSON editor` to edit the json directly:
+``` yaml
+---
+declared-services:
+  wcsi-conversation-service:
+    label: conversation
+    plan: free
+applications:
+- name: pizza-ya-campusprty
+  command: npm start
+  path: .
+  memory: 256M
+  instances: 1
+  env:
+    NPM_CONFIG_PRODUCTION: false
+  buildpack: sdk-for-nodejs
+```
 
-!["Pizza config edit JSON"](doc/source/images/pizzaConfig3NotFoundJson.png)
+4. configurar variables de entorno en `.env`
 
-Here, we've set an empty value for the context: {"pizza_topings"} field, so that we can exit
-the loop by filling this slot.
+```yaml
+# Replace the credentials here with your own.
+# Rename this file to .env before running 'npm start'
 
-Finally, we add responses for once the slots are all filled:
+WORKSPACE_ID=<put workspace id here>
 
-!["Pizza order finish"](doc/source/images/pizzaOrderFinish1.png)
+ASSISTANT_IAM_APIKEY=<put assistant IAM apikey here>
+ASSISTANT_URL=<put assistant url here>
+```
+El identificador del workspace lo obtienen de la siguiente forma:
 
-We start with the case where we have "pizza_toppings", by detecting that the
-array has size>0.
-Here, we first handle the case where the optional "pizza_place" slot
-is filled, and then handle the case where it is not.
+!["Get Workspace ID"](https://raw.githubusercontent.com/IBM/pattern-utils/master/watson-assistant/assistantPostSkillGetID.gif)
 
-!["Pizza order finish no place"](doc/source/images/pizzaOrderFinish2.png)
+Las credenciales de acceso al servicio de la siguiente forma:
 
-Finally, we add a handler for the case where the user's answers to a prompt
-is not found. We've added a handler for the intent "help".
+!["Assistant Credentials"](https://raw.githubusercontent.com/IBM/pattern-utils/master/watson-assistant/watson_assistant_api_key.png)
 
-!["Pizza handle Help"](doc/source/images/pizzaHandleHelp.png)
 
-We have a dialog node to handle the intent `#reset` which will reset all fields to `null`:
+4. Instalar paquete de BZIP2 para instalación de PhantomJs
 
-!["Pizza reset node"](doc/source/images/pizzaResetNode.png)
+```
+$ sudo yum install bzip2
+```
 
-## Assistant Example
+5. Instalar la app local usando NPM
 
-Let's look at an example conversation and the associated json.
-With your Watson Pizzeria running, start a dialog and begin with
-telling the Pizza Bot you want a large pizza:
+```
+$ npm install
+```
 
-![](doc/source/images/pizzaEX1orderLarge.png)
+### Ejecución Local ###
 
-The 'User Input' shows you the "input"{"text"} field, as well as come of the
-"context" that is mostly used for Assistant to keep track of internal state.
-Scroll Down to `Watson Understands` and look at `intents`:
+1. Levantamos nuestra Web app
 
-![](doc/source/images/pizzaEX2WatsonUnderstandsOrderSize.png)
+```
+$ npm start
+```
 
-Note that the intent for "order" is detected. The entity "pizza_size" is now
-a slot that is filled out.
-We still have 2 required slots, "pizza_type" and "pizza_toppings". The user will
-be prompted until these are filled out:
+2. Accedemos a la aplicación usando un browser a la siguiente dirección http://localhost:3000
 
-![](doc/source/images/pizzaEX3fillSlots.png)
+3. Revisemos el comportamiento de nuestro asistente
 
-We can now see that all required slots are filled:
+### Subamos nuestra aplicación a la Nube ###
 
-![](doc/source/images/pizzaEX4slotsFilled.png)
+1. Iniciemos la CLI de IBM cloud
 
-What if we wanted to tell the Watson Pizzeria that we wanted to
-eat the pizza there, in the restaurant? Too late! the slot for
-"pizza_place" is optional, so the user won't be prompted for it, and
-once the required slots are filled, we exit the "Pizza Ordering" dialog
-node. The user needs to fill out optional slots first.
-Type reset to start again and test this by adding the phrase "to eat there...":
+```
+$ ibmcloud login
+```
 
-![](doc/source/images/pizzaEX5eatThere.png)
+2. Definamos nuestro target a aplicaciones Cloud Foundry usando este comando
 
-## Troubleshooting
+```
+$ ibmcloud target --cf
+```
 
-* Deploy using Cloud Foundry `cf push` gives:
+3. Subamos nuestra app a IBM cloud
 
-``FAILED
-Could not find service <Watson_service> to bind to <IBM_Cloud_application>``
+```
+$ ibmcloud app push
+```
 
-If you name your service `wcsi-conversation-service`, this should work.
-When you use `cf push`, it is trying to bind to the services listed in the `manifest.yml`.
+4. A pedir Pizzas!
 
-So, there are 2 ways you can get this to work:
+# Contactos #
 
-* Change the names of your IBM Cloud services to match the names in the manifest.
-* Change the names in the manifest to match the names of your IBM Cloud services.
-
->NOTE: The `Deploy to IBM Cloud` button solves this issue by creating the services on the fly (with the correct names).
-
-## License
-
-This code pattern is licensed under the Apache Software License, Version 2.  Separate third party code objects invoked within this code pattern are licensed by their respective providers pursuant to their own separate licenses. Contributions are subject to the [Developer Certificate of Origin, Version 1.1 (DCO)](https://developercertificate.org/) and the [Apache Software License, Version 2](https://www.apache.org/licenses/LICENSE-2.0.txt).
-
-[Apache Software License (ASL) FAQ](https://www.apache.org/foundation/license-faq.html#WhatDoesItMEAN)
-
-## Links
-
-* [Demo on youtube](https://youtu.be/6QlAnqSiWvo)
-* [IBM Watson Assistant Docs](https://cloud.ibm.com/docs/services/conversation/dialog-build.html#dialog-build)
-* [Blog for IBM Watson Assistant Slots Code Pattern](https://developer.ibm.com/code/2017/09/19/managing-resources-efficiently-watson-conversation-slots/)
-
-## Learn more
-
-* **Artificial Intelligence Code Patterns**: Enjoyed this Code Pattern? Check out our other [AI Code Patterns](https://developer.ibm.com/technologies/artificial-intelligence/).
-* **AI and Data Code Pattern Playlist**: Bookmark our [playlist](https://www.youtube.com/playlist?list=PLzUbsvIyrNfknNewObx5N7uGZ5FKH0Fde) with all of our Code Pattern videos
-* **With Watson**: Want to take your Watson app to the next level? Looking to utilize Watson Brand assets? [Join the With Watson program](https://www.ibm.com/watson/with-watson/) to leverage exclusive brand, marketing, and tech resources to amplify and accelerate your Watson embedded commercial solution.
-* **Kubernetes on IBM Cloud**: Deliver your apps with the combined the power of [Kubernetes and Docker on IBM Cloud](https://www.ibm.com/cloud/container-service)
+Siguenos en twiiter [@IBMUruguay](https://twitter.com/IBMUruguay)
