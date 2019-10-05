@@ -74,10 +74,10 @@ $ npm -v
 3. Selecciona la pestaña `Skills`
 4. Seleccionar `Create Skill`
 5. Selecciona `Import Skill`
-6. Selecciona carga desde archivo en esta dirección [`data/watson-pizzeria.json`](data/watson-pizzeria.json)
+6. Selecciona carga desde archivo en esta dirección [`data/skill-WatsonPizzeria.json`](data/watson-pizzeria.json)
 7. Asegurate que esté marcado la opción `Everything` y pulsa el botó `Import`
 
-### Instalación Aplicación Web ###
+### Instalación Aplicación Web Linux ###
 
 1. Crear directorio de trabajo (Por ejemplo ~/lab/)
 
